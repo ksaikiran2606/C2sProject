@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+# Don't exit on error - we want server to start even if migrations fail
+set +e
 
 echo "=========================================="
 echo "Starting Django Application"
@@ -19,10 +20,15 @@ python -c "import django; django.setup(); print('Django setup OK')" || echo "Dja
 
 # Run migrations (with retry and error handling)
 echo "Running database migrations..."
-python manage.py migrate --noinput 2>&1 || {
-    echo "Migration failed, but continuing..."
+python manage.py migrate --noinput 2>&1
+MIGRATION_EXIT_CODE=$?
+if [ $MIGRATION_EXIT_CODE -ne 0 ]; then
+    echo "WARNING: Migration failed (exit code: $MIGRATION_EXIT_CODE), but continuing..."
     echo "You may need to run migrations manually"
-}
+    echo "Server will start anyway - health endpoint doesn't require database"
+else
+    echo "Migrations completed successfully"
+fi
 
 # Check if we can import the WSGI application
 echo "Checking WSGI application..."
