@@ -18,11 +18,12 @@ RUN python manage.py collectstatic --noinput
 
 # Make start script executable
 RUN chmod +x start.sh || true
+RUN chmod +x start-simple.sh || true
 
 EXPOSE 8000
 
-# Use start script which handles migrations
-# Use shell form to ensure proper execution
-CMD ./start.sh
+# Direct gunicorn command - simpler and more reliable
+# Run migrations first, then start server
+CMD python manage.py migrate --noinput 2>&1 || echo "Migrations failed, continuing..." && gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120 --access-logfile - --error-logfile - marketplace.wsgi:application
 
 
