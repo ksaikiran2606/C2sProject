@@ -68,7 +68,6 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 if DATABASE_URL:
     # Parse DATABASE_URL (Railway format: postgresql://user:password@host:port/dbname)
-    import re
     db_match = re.match(r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', DATABASE_URL)
     if db_match:
         DATABASES = {
@@ -189,7 +188,6 @@ if DEBUG:
 REDIS_URL = os.getenv('REDIS_URL')
 if REDIS_URL:
     # Parse REDIS_URL (format: redis://host:port or redis://:password@host:port)
-    import re
     redis_match = re.match(r'redis://(?:([^:@]+):([^@]+)@)?([^:]+):(\d+)', REDIS_URL)
     if redis_match:
         redis_host = redis_match.group(3)
