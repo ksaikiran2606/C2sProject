@@ -22,6 +22,7 @@ RUN chmod +x start.sh || true
 EXPOSE 8000
 
 # Use start script which handles migrations
-CMD ["./start.sh"]
+# Use shell form to ensure proper execution
+CMD ./start.sh
 
 
