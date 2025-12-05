@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
@@ -184,14 +185,43 @@ if DEBUG:
         r"^http://192\.168\.\d+\.\d+:\d+$",  # Allow local network IPs
     ]
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [(os.getenv('REDIS_HOST', 'localhost'), int(os.getenv('REDIS_PORT', 6379)))],
+# Redis configuration - Railway provides REDIS_URL
+REDIS_URL = os.getenv('REDIS_URL')
+if REDIS_URL:
+    # Parse REDIS_URL (format: redis://host:port or redis://:password@host:port)
+    import re
+    redis_match = re.match(r'redis://(?:([^:@]+):([^@]+)@)?([^:]+):(\d+)', REDIS_URL)
+    if redis_match:
+        redis_host = redis_match.group(3)
+        redis_port = int(redis_match.group(4))
+        CHANNEL_LAYERS = {
+            'default': {
+                'BACKEND': 'channels_redis.core.RedisChannelLayer',
+                'CONFIG': {
+                    "hosts": [(redis_host, redis_port)],
+                },
+            },
+        }
+    else:
+        # Fallback to individual env vars
+        CHANNEL_LAYERS = {
+            'default': {
+                'BACKEND': 'channels_redis.core.RedisChannelLayer',
+                'CONFIG': {
+                    "hosts": [(os.getenv('REDIS_HOST', 'localhost'), int(os.getenv('REDIS_PORT', 6379)))],
+                },
+            },
+        }
+else:
+    # No REDIS_URL, use individual env vars
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                "hosts": [(os.getenv('REDIS_HOST', 'localhost'), int(os.getenv('REDIS_PORT', 6379)))],
+            },
         },
-    },
-}
+    }
 
 CLOUDINARY = {
     'cloud_name': os.getenv('CLOUDINARY_CLOUD_NAME', ''),
