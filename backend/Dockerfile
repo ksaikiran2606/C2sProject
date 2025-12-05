@@ -16,9 +16,12 @@ COPY . .
 
 RUN python manage.py collectstatic --noinput
 
+# Make start script executable
+RUN chmod +x start.sh || true
+
 EXPOSE 8000
 
-# Use PORT environment variable (Railway provides this)
-CMD gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120 --access-logfile - --error-logfile - marketplace.wsgi:application
+# Use start script which handles migrations
+CMD ["./start.sh"]
 
 
