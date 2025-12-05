@@ -62,26 +62,66 @@ WSGI_APPLICATION = 'marketplace.wsgi.application'
 ASGI_APPLICATION = 'marketplace.asgi.application'
 
 # Use SQLite for development if PostgreSQL is not configured
-USE_POSTGRES = os.getenv('USE_POSTGRES', 'False') == 'True'
+# Railway provides DATABASE_URL automatically
+DATABASE_URL = os.getenv('DATABASE_URL')
 
-if USE_POSTGRES:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'marketplace_db'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
+if DATABASE_URL:
+    # Parse DATABASE_URL (Railway format: postgresql://user:password@host:port/dbname)
+    import re
+    db_match = re.match(r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', DATABASE_URL)
+    if db_match:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': db_match.group(5),
+                'USER': db_match.group(1),
+                'PASSWORD': db_match.group(2),
+                'HOST': db_match.group(3),
+                'PORT': db_match.group(4),
+            }
         }
-    }
+    else:
+        # Fallback to individual env vars
+        USE_POSTGRES = os.getenv('USE_POSTGRES', 'False') == 'True'
+        if USE_POSTGRES:
+            DATABASES = {
+                'default': {
+                    'ENGINE': 'django.db.backends.postgresql',
+                    'NAME': os.getenv('DB_NAME', 'marketplace_db'),
+                    'USER': os.getenv('DB_USER', 'postgres'),
+                    'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+                    'HOST': os.getenv('DB_HOST', 'localhost'),
+                    'PORT': os.getenv('DB_PORT', '5432'),
+                }
+            }
+        else:
+            DATABASES = {
+                'default': {
+                    'ENGINE': 'django.db.backends.sqlite3',
+                    'NAME': BASE_DIR / 'db.sqlite3',
+                }
+            }
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+    # No DATABASE_URL, check USE_POSTGRES
+    USE_POSTGRES = os.getenv('USE_POSTGRES', 'False') == 'True'
+    if USE_POSTGRES:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.getenv('DB_NAME', 'marketplace_db'),
+                'USER': os.getenv('DB_USER', 'postgres'),
+                'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+                'HOST': os.getenv('DB_HOST', 'localhost'),
+                'PORT': os.getenv('DB_PORT', '5432'),
+            }
         }
-    }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

@@ -18,6 +18,7 @@ RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "marketplace.wsgi:application"]
+# Use PORT environment variable (Railway provides this)
+CMD gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120 --access-logfile - --error-logfile - marketplace.wsgi:application
 
 
