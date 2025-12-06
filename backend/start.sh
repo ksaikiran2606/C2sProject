@@ -2,31 +2,26 @@
 # Don't exit on error - we want server to start even if migrations fail
 set +e
 
-echo "=========================================="
-echo "Starting Django Application"
-echo "=========================================="
-echo "PORT: ${PORT:-8000}"
+# Immediate output to confirm script is running (flush immediately)
+echo "==========================================" >&2
+echo "STARTUP SCRIPT EXECUTING" >&2
+echo "==========================================" >&2
+echo "Timestamp: $(date)" >&2
+echo "Working directory: $(pwd)" >&2
+echo "PORT: ${PORT:-8000}" >&2
+echo "" >&2
 
-# Check for SECRET_KEY (critical)
+# Check for SECRET_KEY (warn but don't exit - use fallback)
 if [ -z "$SECRET_KEY" ]; then
-    echo ""
-    echo "=========================================="
-    echo "ERROR: SECRET_KEY is not set!"
-    echo "=========================================="
-    echo ""
-    echo "SECRET_KEY is required for Django to start."
-    echo "Please set it in Railway Variables tab:"
-    echo ""
-    echo "1. Go to Railway → Your Service → Variables"
-    echo "2. Click '+ New Variable'"
-    echo "3. Name: SECRET_KEY"
-    echo "4. Value: Generate with PowerShell:"
-    echo "   -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 50 | ForEach-Object {[char]$_})"
-    echo ""
-    echo "The server cannot start without SECRET_KEY."
-    exit 1
+    echo "==========================================" >&2
+    echo "WARNING: SECRET_KEY is not set!" >&2
+    echo "==========================================" >&2
+    echo "" >&2
+    echo "Using fallback SECRET_KEY - set proper one in Railway Variables!" >&2
+    echo "" >&2
+    export SECRET_KEY="django-insecure-fallback-$(date +%s)-change-in-production"
 else
-    echo "SECRET_KEY: ${SECRET_KEY:0:10}... (set)"
+    echo "SECRET_KEY: ${SECRET_KEY:0:10}... (set)" >&2
 fi
 
 if [ -n "$DATABASE_URL" ]; then
@@ -105,21 +100,24 @@ if [ $WSGI_CHECK_EXIT -ne 0 ]; then
 fi
 
 # Start gunicorn
-echo ""
-echo "Starting Gunicorn server..."
-echo "Binding to: 0.0.0.0:${PORT:-8000}"
-echo "Workers: 2"
-echo "Timeout: 120"
-echo ""
+echo "" >&2
+echo "==========================================" >&2
+echo "Starting Gunicorn server..." >&2
+echo "==========================================" >&2
+echo "Binding to: 0.0.0.0:${PORT:-8000}" >&2
+echo "Workers: 2" >&2
+echo "Timeout: 120" >&2
+echo "" >&2
 
 # Ensure PORT is set
 if [ -z "$PORT" ]; then
-    echo "WARNING: PORT not set, using default 8000"
+    echo "WARNING: PORT not set, using default 8000" >&2
     export PORT=8000
 fi
 
 # Use exec to replace shell process
 # Remove --preload flag as it can cause issues with Django initialization
+echo "Executing: gunicorn --bind 0.0.0.0:${PORT} --workers 2 --timeout 120 marketplace.wsgi:application" >&2
 exec gunicorn \
     --bind 0.0.0.0:${PORT} \
     --workers 2 \
