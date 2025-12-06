@@ -32,8 +32,20 @@ fi
 
 # Check if we can import the WSGI application
 echo "Checking WSGI application..."
-python -c "from marketplace.wsgi import application; print('WSGI import OK')" || {
+python -c "
+import os
+import sys
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'marketplace.settings')
+try:
+    from marketplace.wsgi import application
+    print('WSGI import OK')
+except Exception as e:
+    print(f'ERROR: Cannot import WSGI application: {e}')
+    sys.exit(1)
+" || {
     echo "ERROR: Cannot import WSGI application!"
+    echo "This might be due to missing SECRET_KEY or database connection issues"
+    echo "Check Railway logs for more details"
     exit 1
 }
 
@@ -45,14 +57,21 @@ echo "Workers: 2"
 echo "Timeout: 120"
 echo ""
 
+# Ensure PORT is set
+if [ -z "$PORT" ]; then
+    echo "WARNING: PORT not set, using default 8000"
+    export PORT=8000
+fi
+
 # Use exec to replace shell process
+# Remove --preload flag as it can cause issues with Django initialization
 exec gunicorn \
-    --bind 0.0.0.0:${PORT:-8000} \
+    --bind 0.0.0.0:${PORT} \
     --workers 2 \
     --timeout 120 \
     --access-logfile - \
     --error-logfile - \
     --log-level info \
-    --preload \
+    --capture-output \
     marketplace.wsgi:application
 

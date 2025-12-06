@@ -23,6 +23,7 @@ RUN chmod +x start-simple.sh || true
 EXPOSE 8000
 
 # Use start.sh script which handles migrations and server startup properly
-CMD ["./start.sh"]
+# Use shell form to ensure bash script runs correctly
+CMD ["/bin/bash", "./start.sh"]
 
 
