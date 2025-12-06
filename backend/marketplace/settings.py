@@ -66,6 +66,7 @@ ASGI_APPLICATION = 'marketplace.asgi.application'
 # Railway provides DATABASE_URL automatically
 DATABASE_URL = os.getenv('DATABASE_URL')
 
+# Configure database with connection timeout to prevent blocking on startup
 if DATABASE_URL:
     # Parse DATABASE_URL (Railway format: postgresql://user:password@host:port/dbname)
     db_match = re.match(r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', DATABASE_URL)
@@ -78,6 +79,10 @@ if DATABASE_URL:
                 'PASSWORD': db_match.group(2),
                 'HOST': db_match.group(3),
                 'PORT': db_match.group(4),
+                'CONN_MAX_AGE': 0,  # Don't persist connections
+                'OPTIONS': {
+                    'connect_timeout': 5,  # 5 second timeout
+                },
             }
         }
     else:
@@ -92,6 +97,10 @@ if DATABASE_URL:
                     'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
                     'HOST': os.getenv('DB_HOST', 'localhost'),
                     'PORT': os.getenv('DB_PORT', '5432'),
+                    'CONN_MAX_AGE': 0,
+                    'OPTIONS': {
+                        'connect_timeout': 5,
+                    },
                 }
             }
         else:
@@ -113,6 +122,10 @@ else:
                 'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
                 'HOST': os.getenv('DB_HOST', 'localhost'),
                 'PORT': os.getenv('DB_PORT', '5432'),
+                'CONN_MAX_AGE': 0,
+                'OPTIONS': {
+                    'connect_timeout': 5,
+                },
             }
         }
     else:
