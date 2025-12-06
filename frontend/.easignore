@@ -1,5 +1,12 @@
 # EAS Build ignore file
-# This file tells EAS which files to exclude from the build
+# This ensures EAS only builds from frontend directory
+
+# Ignore parent directory (backend, root files)
+../backend/
+../*.md
+../*.ps1
+../*.sh
+../package-lock.json
 
 # Ignore node_modules (will be installed during build)
 node_modules/

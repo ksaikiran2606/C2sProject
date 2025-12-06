@@ -1,0 +1,15 @@
+# EAS Build ignore file at project root
+# This ensures backend is not included when building from root
+
+# Ignore backend completely
+backend/
+
+# Ignore root-level files that aren't needed for frontend build
+*.md
+*.ps1
+*.sh
+package-lock.json
+
+# Ignore git files (EAS handles this)
+.git/
+
