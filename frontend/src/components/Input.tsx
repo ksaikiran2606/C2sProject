@@ -32,7 +32,7 @@ export const Input: React.FC<InputProps> = ({
         style={[
           styles.input,
           multiline && styles.multilineInput,
-          error && styles.inputError,
+          error ? styles.inputError : null,
         ]}
         value={value}
         onChangeText={onChangeText}

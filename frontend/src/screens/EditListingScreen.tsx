@@ -128,15 +128,17 @@ export const EditListingScreen: React.FC<{ navigation: any; route: any }> = ({ n
 
     setLoading(true);
 
+    let uploadedImages: string[] = [];
+    let priceNumber: number = 0;
+
     try {
-      let uploadedImages: string[] = [];
       try {
         uploadedImages = await uploadMultipleImages(images);
       } catch (uploadError: any) {
         uploadedImages = images;
       }
 
-      const priceNumber = parseFloat(price);
+      priceNumber = parseFloat(price);
       if (isNaN(priceNumber) || priceNumber <= 0) {
         showToast('Please enter a valid price', 'error');
         setLoading(false);
@@ -149,7 +151,7 @@ export const EditListingScreen: React.FC<{ navigation: any; route: any }> = ({ n
         price: priceNumber.toString(),
         category_id: categoryId,
         location: location.trim(),
-        images_data: uploadedImages, // Use images_data for update
+        images: uploadedImages,
       });
 
       // Show success toast
@@ -166,7 +168,7 @@ export const EditListingScreen: React.FC<{ navigation: any; route: any }> = ({ n
         price: priceNumber.toString(),
         category_id: categoryId,
         location: location.trim(),
-        images_data: uploadedImages?.length || 0,
+        images: uploadedImages?.length || 0,
       });
       
       // Check if it's actually a success (sometimes backend returns error but updates)

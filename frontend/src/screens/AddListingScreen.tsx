@@ -413,5 +413,27 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginBottom: 8,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    paddingTop: 60,
+    backgroundColor: COLORS.PRIMARY,
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 12,
+  },
+  backButtonText: {
+    color: COLORS.WHITE,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.WHITE,
+  },
 });
 
