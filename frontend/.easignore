@@ -1,0 +1,6 @@
+# Ignore everything outside frontend directory
+../*
+
+# But don't ignore this directory
+!../.git
+
