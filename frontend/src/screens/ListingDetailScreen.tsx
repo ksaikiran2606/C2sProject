@@ -363,6 +363,15 @@ const styles = StyleSheet.create({
     height: 300,
     backgroundColor: COLORS.LIGHT_GRAY,
   },
+  placeholderImage: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 18,
+    color: COLORS.GRAY,
+    textAlign: 'center',
+  },
   content: {
     padding: 16,
   },

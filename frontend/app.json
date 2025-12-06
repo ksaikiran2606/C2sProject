@@ -1,54 +1,59 @@
-{
-  "expo": {
-    "name": "ClickToSell",
-    "slug": "clicktosell",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#34B66C"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.clicktosell.app"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#34B66C"
-      },
-      "package": "com.clicktosell.app"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "apiBaseUrl": "http://192.168.1.8:8000/api",
-      "wsBaseUrl": "ws://192.168.1.8:8000",
-      "cloudinaryCloudName": "",
-      "cloudinaryUploadPreset": ""
-    },
-    "plugins": [
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them."
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon.png",
-          "color": "#34B66C"
-        }
-      ]
-    ]
-  }
+﻿{
+    "expo":  {
+                 "name":  "ClickToSell",
+                 "slug":  "clicktosell",
+                 "version":  "1.0.0",
+                 "orientation":  "portrait",
+                 "icon":  "./assets/icon.png",
+                 "userInterfaceStyle":  "light",
+                 "splash":  {
+                                "image":  "./assets/splash.png",
+                                "resizeMode":  "contain",
+                                "backgroundColor":  "#34B66C"
+                            },
+                 "assetBundlePatterns":  [
+                                             "**/*"
+                                         ],
+                 "ios":  {
+                             "supportsTablet":  true,
+                             "bundleIdentifier":  "com.clicktosell.app"
+                         },
+                 "android":  {
+                                 "adaptiveIcon":  {
+                                                      "foregroundImage":  "./assets/adaptive-icon.png",
+                                                      "backgroundColor":  "#34B66C"
+                                                  },
+                                 "package":  "com.clicktosell.app",
+                                 "permissions":  [
+                                                     "android.permission.RECORD_AUDIO"
+                                                 ]
+                             },
+                 "web":  {
+                             "favicon":  "./assets/favicon.png"
+                         },
+                 "extra":  {
+                               "apiBaseUrl":  "https://c2sproject-production.up.railway.app/api",
+                               "wsBaseUrl":  "wss://c2sproject-production.up.railway.app",
+                               "cloudinaryCloudName":  "",
+                               "cloudinaryUploadPreset":  "",
+                               "eas":  {
+                                           "projectId":  "80007bba-da10-4847-a147-3bb92fe0863c"
+                                       }
+                           },
+                 "plugins":  [
+                                 [
+                                     "expo-image-picker",
+                                     {
+                                         "photosPermission":  "The app accesses your photos to let you share them."
+                                     }
+                                 ],
+                                 [
+                                     "expo-notifications",
+                                     {
+                                         "icon":  "./assets/icon.png",
+                                         "color":  "#34B66C"
+                                     }
+                                 ]
+                             ]
+             }
 }
-
