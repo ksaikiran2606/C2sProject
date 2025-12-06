@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+import dj_database_url
 
 load_dotenv()
 
@@ -10,7 +11,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,192.168.1.8,0.0.0.0,*.railway.app,*.up.railway.app').split(',')
+
+# Fix ALLOWED_HOSTS - Railway needs permissive settings
+ALLOWED_HOSTS = ['*']
+if os.getenv('RAILWAY_PUBLIC_DOMAIN'):
+    ALLOWED_HOSTS.append(os.getenv('RAILWAY_PUBLIC_DOMAIN'))
+if os.getenv('RAILWAY_PRIVATE_DOMAIN'):
+    ALLOWED_HOSTS.append(os.getenv('RAILWAY_PRIVATE_DOMAIN'))
+# Also add from env var if set
+if os.getenv('ALLOWED_HOSTS'):
+    ALLOWED_HOSTS.extend(os.getenv('ALLOWED_HOSTS').split(','))
+# Remove duplicates and empty strings
+ALLOWED_HOSTS = list(set([h for h in ALLOWED_HOSTS if h]))
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -62,79 +74,41 @@ TEMPLATES = [
 WSGI_APPLICATION = 'marketplace.wsgi.application'
 ASGI_APPLICATION = 'marketplace.asgi.application'
 
-# Use SQLite for development if PostgreSQL is not configured
-# Railway provides DATABASE_URL automatically
+# Database configuration - Railway PostgreSQL support
+# Railway provides either DATABASE_URL or individual PG* variables
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-# Configure database with connection timeout to prevent blocking on startup
+# Check for Railway PostgreSQL variables (PGHOST, PGUSER, etc.)
+if not DATABASE_URL and all([
+    os.getenv('PGHOST'),
+    os.getenv('PGUSER'),
+    os.getenv('PGPASSWORD'),
+    os.getenv('PGDATABASE'),
+    os.getenv('PGPORT')
+]):
+    # Build DATABASE_URL from Railway PostgreSQL variables
+    DATABASE_URL = f"postgres://{os.getenv('PGUSER')}:{os.getenv('PGPASSWORD')}@{os.getenv('PGHOST')}:{os.getenv('PGPORT')}/{os.getenv('PGDATABASE')}"
+
+# Configure database using dj-database-url (handles both formats)
 if DATABASE_URL:
-    # Parse DATABASE_URL (Railway format: postgresql://user:password@host:port/dbname)
-    db_match = re.match(r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', DATABASE_URL)
-    if db_match:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': db_match.group(5),
-                'USER': db_match.group(1),
-                'PASSWORD': db_match.group(2),
-                'HOST': db_match.group(3),
-                'PORT': db_match.group(4),
-                'CONN_MAX_AGE': 0,  # Don't persist connections
-                'OPTIONS': {
-                    'connect_timeout': 5,  # 5 second timeout
-                },
-            }
-        }
-    else:
-        # Fallback to individual env vars
-        USE_POSTGRES = os.getenv('USE_POSTGRES', 'False') == 'True'
-        if USE_POSTGRES:
-            DATABASES = {
-                'default': {
-                    'ENGINE': 'django.db.backends.postgresql',
-                    'NAME': os.getenv('DB_NAME', 'marketplace_db'),
-                    'USER': os.getenv('DB_USER', 'postgres'),
-                    'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-                    'HOST': os.getenv('DB_HOST', 'localhost'),
-                    'PORT': os.getenv('DB_PORT', '5432'),
-                    'CONN_MAX_AGE': 0,
-                    'OPTIONS': {
-                        'connect_timeout': 5,
-                    },
-                }
-            }
-        else:
-            DATABASES = {
-                'default': {
-                    'ENGINE': 'django.db.backends.sqlite3',
-                    'NAME': BASE_DIR / 'db.sqlite3',
-                }
-            }
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600
+        )
+    }
+    # Add connection timeout
+    if 'OPTIONS' not in DATABASES['default']:
+        DATABASES['default']['OPTIONS'] = {}
+    DATABASES['default']['OPTIONS']['connect_timeout'] = 5
 else:
-    # No DATABASE_URL, check USE_POSTGRES
-    USE_POSTGRES = os.getenv('USE_POSTGRES', 'False') == 'True'
-    if USE_POSTGRES:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': os.getenv('DB_NAME', 'marketplace_db'),
-                'USER': os.getenv('DB_USER', 'postgres'),
-                'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-                'HOST': os.getenv('DB_HOST', 'localhost'),
-                'PORT': os.getenv('DB_PORT', '5432'),
-                'CONN_MAX_AGE': 0,
-                'OPTIONS': {
-                    'connect_timeout': 5,
-                },
-            }
+    # Fallback to SQLite for development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
-    else:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': BASE_DIR / 'db.sqlite3',
-            }
-        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

@@ -28,6 +28,9 @@ def main():
         print(f"PORT: {port}", flush=True)
         print(f"SECRET_KEY: {'SET' if os.getenv('SECRET_KEY') else 'NOT SET (using fallback)'}", flush=True)
         print(f"DATABASE_URL: {'SET' if os.getenv('DATABASE_URL') else 'NOT SET'}", flush=True)
+        # Check Railway PostgreSQL variables
+        if os.getenv('PGHOST'):
+            print(f"Railway PostgreSQL: HOST={os.getenv('PGHOST')}, DB={os.getenv('PGDATABASE', 'N/A')}", flush=True)
         print("=" * 50, flush=True)
         print("", flush=True)
     
