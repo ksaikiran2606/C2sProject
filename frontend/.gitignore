@@ -5,4 +5,8 @@ dist/
 .env
 *.log
 
+# Native directories (should not exist in managed Expo)
+android/
+ios/
+
 
