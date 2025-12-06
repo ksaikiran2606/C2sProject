@@ -19,11 +19,11 @@ RUN python manage.py collectstatic --noinput
 # Make start script executable
 RUN chmod +x start.sh || true
 RUN chmod +x start-simple.sh || true
+RUN chmod +x entrypoint.py || true
 
 EXPOSE 8000
 
-# Use start.sh script which handles migrations and server startup properly
-# Use shell form to ensure bash script runs correctly
-CMD ["/bin/bash", "./start.sh"]
+# Use Python entrypoint script - more reliable than bash
+CMD ["python", "entrypoint.py"]
 
 
